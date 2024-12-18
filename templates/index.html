@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Model Predictions</title>
+    <style>
+      /* General Reset */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+        line-height: 1.6;
+        margin: 0;
+      }
+
+      h1,
+      h2,
+      h3 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #2c3e50;
+      }
+
+      /* Navigation Buttons */
+      .nav-buttons {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+      }
+
+      .nav-buttons button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        margin: 0 10px;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .nav-buttons button:hover {
+        background-color: #2980b9;
+      }
+
+      /* Sections */
+      .section {
+        display: none;
+        padding: 20px;
+        background-color: #fff;
+        margin: 20px auto;
+        width: 90%;
+        max-width: 800px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+      }
+
+      .section.active {
+        display: block;
+      }
+
+      form label {
+        display: block;
+        margin: 10px 0;
+        font-weight: bold;
+      }
+
+      form input,
+      form textarea {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0 15px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+
+      form input[type="submit"],
+      form button {
+        background-color: #27ae60;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background 0.3s ease;
+      }
+
+      form input[type="submit"]:hover,
+      form button:hover {
+        background-color: #219150;
+      }
+
+      /* Visualization Images */
+      .visualization-images {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .visualization-images img {
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        padding: 10px;
+        margin-top: 20px;
+        background-color: #2c3e50;
+        color: white;
+      }
+    </style>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        function showSection(sectionId) {
+          const sections = document.querySelectorAll(".section");
+          sections.forEach((section) => section.classList.remove("active"));
+          const targetSection = document.getElementById(sectionId);
+          if (targetSection) {
+            targetSection.classList.add("active");
+          }
+        }
+
+        const buttons = document.querySelectorAll(".nav-buttons button");
+        buttons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const sectionId = this.getAttribute("data-target");
+            showSection(sectionId);
+          });
+        });
+
+        showSection("house-prediction"); // Default section
+
+        // Function to handle AJAX form submission
+        function handleFormSubmission(formSelector, resultContainer) {
+          const form = document.querySelector(formSelector);
+          form.addEventListener("submit", function (e) {
+            e.preventDefault(); // Prevent full page reload
+            const formData = new FormData(form);
+
+            fetch("/", {
+              method: "POST",
+              body: formData,
+            })
+              .then((response) => response.text())
+              .then((data) => {
+                // Parse the response and update the results container
+                const parser = new DOMParser();
+                const htmlDoc = parser.parseFromString(data, "text/html");
+                const newResults = htmlDoc.querySelector(resultContainer);
+                document.querySelector(resultContainer).innerHTML =
+                  newResults.innerHTML;
+              })
+              .catch((error) => console.error("Error:", error));
+          });
+        }
+
+        // Apply AJAX to all forms
+        handleFormSubmission("#house-prediction form", "#house-prediction");
+        handleFormSubmission("#spam-detection form", "#spam-detection");
+        handleFormSubmission(
+          "#image-visualizations form",
+          "#image-visualizations"
+        );
+      });
+    </script>
+  </head>
+  <body>
+    <h1>Model Predictions</h1>
+
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons">
+      <button type="button" data-target="house-prediction">
+        🏠 House Price Prediction
+      </button>
+      <button type="button" data-target="spam-detection">
+        📧 Spam Detection
+      </button>
+      <button type="button" data-target="image-visualizations">
+        📊 Image Visualizations
+      </button>
+      <button type="button" data-target="churn-prediction">
+        📊 Customer Churn Prediction
+      </button>
+    </div>
+
+    <!-- House Price Prediction -->
+    <div id="house-prediction" class="section active">
+      <h2>🏠 House Price Prediction</h2>
+      <form id="house-form" method="POST">
+        <label
+          >LotArea: <input type="number" name="LotArea" step="0.01" required
+        /></label>
+        <label
+          >OverallQual: <input type="number" name="OverallQual" required
+        /></label>
+        <label
+          >OverallCond: <input type="number" name="OverallCond" required
+        /></label>
+        <label
+          >GrLivArea:
+          <input type="number" name="GrLivArea" step="0.01" required
+        /></label>
+        <label
+          >BedroomAbvGr: <input type="number" name="BedroomAbvGr" required
+        /></label>
+        <label
+          >YearBuilt: <input type="number" name="YearBuilt" required
+        /></label>
+        <input type="submit" value="Predict House Prices" />
+      </form>
+      <p>
+        Linear Regression Prediction:
+        <strong>{{ predictions.get('house_linear') }}</strong>
+      </p>
+      <p>
+        Random Forest Prediction:
+        <strong>{{ predictions.get('house_rf') }}</strong>
+      </p>
+    </div>
+    <!-- Customer Churn Prediction Section -->
+    <div id="churn-prediction" class="section">
+      <h2>📊 Customer Churn Prediction</h2>
+      <form id="churn-form" method="POST">
+        <label>Age: <input type="number" name="Age" required /></label>
+        <label
+          >Gender:
+          <select name="Gender">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </label>
+        <label>Tenure: <input type="number" name="Tenure" required /></label>
+        <label
+          >Usage Frequency: <input type="number" name="UsageFrequency" required
+        /></label>
+        <label
+          >Support Calls: <input type="number" name="SupportCalls" required
+        /></label>
+        <label
+          >Payment Delay: <input type="number" name="PaymentDelay" required
+        /></label>
+        <label
+          >Subscription Type:
+          <select name="SubscriptionType">
+            <option value="Standard">Standard</option>
+            <option value="Premium">Premium</option>
+          </select>
+        </label>
+        <label
+          >Contract Length: <input type="number" name="ContractLength" required
+        /></label>
+        <label
+          >Total Spend:
+          <input type="number" name="TotalSpend" step="0.01" required
+        /></label>
+        <label
+          >Last Interaction:
+          <input type="number" name="LastInteraction" required
+        /></label>
+        <button type="submit">Predict Customer Churn</button>
+      </form>
+      <p>
+        Linear Regression Prediction:
+        <strong>{{ predictions.get('churn_linear') }}</strong>
+      </p>
+      <p>
+        Random Forest Prediction:
+        <strong>{{ predictions.get('churn_rf') }}</strong>
+      </p>
+    </div>
+    <!-- Spam Detection -->
+    <div id="spam-detection" class="section">
+      <h2>📧 Spam Detection</h2>
+      <form id="spam-form" method="POST">
+        <label
+          >Email Text:
+          <textarea name="email_text" rows="4" cols="50" required></textarea>
+        </label>
+        <button type="submit" value="Predict Spam">Predict Spam</button>
+      </form>
+      <p>
+        Logistic Regression Prediction:
+        <strong>{{ predictions.get('spam_logistic') }}</strong>
+      </p>
+      <p>
+        Naive Bayes Prediction:
+        <strong>{{ predictions.get('spam_nb') }}</strong>
+      </p>
+    </div>
+
+    <!-- Image Visualizations -->
+    <div id="image-visualizations" class="section">
+      <h2>📊 Image Visualizations</h2>
+      <div class="visualization-images">
+        <!-- Sample Image -->
+        <div>
+          <h3>Sample Images</h3>
+          <img src="/static/sample_images.png" alt="Sample Digits" />
+        </div>
+        <!-- Dimensionality Reduction Images -->
+        {% if show_images %}
+        <div>
+          <h3>PCA Plot</h3>
+          <img src="/static/pca_plot.png" alt="PCA Visualization" />
+        </div>
+        <div>
+          <h3>t-SNE Plot</h3>
+          <img src="/static/tsne_plot.png" alt="t-SNE Visualization" />
+        </div>
+        {% endif %}
+      </div>
+
+      <form id="image-form" method="POST">
+        <input type="hidden" name="generate_plots" value="true" />
+        <input type="submit" value="Generate Dimensionality Plots" />
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <footer>&copy; 2024 Model Predictions. Built with ❤️ and Flask.</footer>
+  </body>
+</html>
