@@ -7,6 +7,7 @@ import seaborn as sns
 from sklearn.datasets import load_digits
 
 app = Flask(__name__)
+port = os.getenv('PORT', 4000)
 
 # Paths
 static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
